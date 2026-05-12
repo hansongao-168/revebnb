@@ -6,6 +6,7 @@ use App\Models\Landlord;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -24,6 +25,9 @@ class LandlordPortalAccessMail extends Mailable implements ShouldQueue
     {
         return new Envelope(
             subject: '房东控制台入口链接',
+            to: [
+                new Address($this->landlord->email, $this->landlord->name),
+            ],
         );
     }
 

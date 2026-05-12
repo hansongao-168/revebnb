@@ -5,7 +5,9 @@ namespace App\Filament\Resources\Landlords\Schemas;
 use App\Models\Landlord;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class LandlordForm
 {
@@ -27,7 +29,11 @@ class LandlordForm
                     ->label('邮箱')
                     ->email()
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule, Get $get): Unique => $rule->where('tenant_id', $get('tenant_id')),
+                    ),
                 TextInput::make('phone')
                     ->label('手机')
                     ->tel()

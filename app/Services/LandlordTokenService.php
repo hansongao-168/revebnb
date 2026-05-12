@@ -59,6 +59,20 @@ class LandlordTokenService
             ->first();
     }
 
+    public function findAnyTokenRowByPlain(string $plain): ?LandlordAccessToken
+    {
+        if ($plain === '' || ! preg_match('/^[a-f0-9]{48}$/', $plain)) {
+            return null;
+        }
+
+        $hash = $this->hashPlainToken($plain);
+
+        return LandlordAccessToken::query()
+            ->where('token_hash', $hash)
+            ->orderByDesc('id')
+            ->first();
+    }
+
     public function portalMagicUrl(string $plain): string
     {
         return url('/landlord-portal/magic/'.$plain);
