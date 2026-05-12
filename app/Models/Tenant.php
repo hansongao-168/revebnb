@@ -44,6 +44,12 @@ class Tenant extends Model
         return $this->hasMany(SaasUser::class);
     }
 
+    /** @return HasMany<Landlord, $this> */
+    public function landlords(): HasMany
+    {
+        return $this->hasMany(Landlord::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === self::STATUS_TRIAL
