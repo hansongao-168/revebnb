@@ -17,7 +17,7 @@ class Auditor
             'action' => $action,
             'subject_type' => $subject ? $subject::class : null,
             'subject_id' => $subject?->getKey(),
-            'properties' => $properties === [] ? null : $properties,
+            'properties' => $properties ?: null,
             'ip_address' => Request::ip(),
         ]);
     }

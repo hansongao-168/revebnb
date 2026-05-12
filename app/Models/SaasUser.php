@@ -48,6 +48,10 @@ class SaasUser extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
+        if ($panel->getId() !== 'tenant') {
+            return false;
+        }
+
         if ((int) $this->status !== 1) {
             return false;
         }

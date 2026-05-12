@@ -15,24 +15,31 @@ class SaasUserForm
             ->components([
                 Select::make('tenant_id')
                     ->relationship('tenant', 'name')
-                    ->required(),
+                    ->required()
+                    ->disabledOn('edit'),
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->maxLength(255),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('邮箱')
                     ->email()
-                    ->required(),
+                    ->required()
+                    ->maxLength(255)
+                    ->disabledOn('edit'),
                 DateTimePicker::make('email_verified_at'),
                 TextInput::make('password')
                     ->password()
-                    ->required(),
+                    ->revealable()
+                    ->dehydrated(fn (?string $state): bool => filled($state))
+                    ->required(fn (string $operation): bool => $operation === 'create'),
                 TextInput::make('role')
-                    ->required()
+                    ->disabled()
                     ->default('owner'),
                 TextInput::make('status')
-                    ->required()
                     ->numeric()
-                    ->default(1),
+                    ->default(1)
+                    ->minValue(0)
+                    ->maxValue(1),
             ]);
     }
 }

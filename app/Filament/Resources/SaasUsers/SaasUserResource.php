@@ -24,16 +24,9 @@ class SaasUserResource extends Resource
 
     protected static ?string $pluralModelLabel = 'SaaS 用户';
 
-    protected static string|UnitEnum|null $navigationGroup = '租户管理';
+    protected static string|UnitEnum|null $navigationGroup = 'SaaS';
 
-    protected static ?int $navigationSort = 11;
-
-    public static function canCreate(): bool
-    {
-        return false;
-    }
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     public static function form(Schema $schema): Schema
     {
@@ -47,7 +40,9 @@ class SaasUserResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            //
+        ];
     }
 
     public static function getPages(): array

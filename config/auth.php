@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Landlord;
 use App\Models\SaasUser;
 use App\Models\User;
 
@@ -44,15 +43,9 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-
         'saas' => [
             'driver' => 'session',
             'provider' => 'saas_users',
-        ],
-
-        'landlord' => [
-            'driver' => 'session',
-            'provider' => 'landlords',
         ],
     ],
 
@@ -82,11 +75,6 @@ return [
         'saas_users' => [
             'driver' => 'eloquent',
             'model' => SaasUser::class,
-        ],
-
-        'landlords' => [
-            'driver' => 'eloquent',
-            'model' => Landlord::class,
         ],
 
         // 'users' => [
