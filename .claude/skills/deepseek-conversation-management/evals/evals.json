@@ -1,0 +1,23 @@
+{
+  "skill_name": "deepseek-conversation-management",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "We need to add DeepSeek conversation history management to our Laravel admin panel. It should support importing JSON/MD files exported from DeepSeek, viewing conversations in a chat-bubble style UI, searching message content, and syncing from the DeepSeek API. Can you build this?",
+      "expected_output": "Complete Feature: conversations table migration, Conversation model, ConversationService with CRUD/import/export/search/API sync, ConversationResource with table/list/filters/actions, ViewConversation page with chat bubble UI, and blade template",
+      "files": []
+    },
+    {
+      "id": 1,
+      "prompt": "后台需要一个AI对话历史管理功能，支持导入导出JSON和Markdown格式，可以搜索对话内容，还能不能对接DeepSeek API自动同步历史记录？",
+      "expected_output": "完整功能：conversations表、Conversation模型、ConversationService（含导入/导出/搜索/API同步）、ConversationResource（表格/过滤/操作按钮）、ViewConversation页面（聊天气泡UI）",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我们想做一个管理DeepSeek聊天记录的功能，能够把从DeepSeek官网导出的JSON对话文件导入到后台，可以按标题搜索对话内容，也可以把对话下载成Markdown格式，支持批量导出",
+      "expected_output": "包含：conversations数据库迁移、Conversation Eloquent模型、ConversationService服务类（导入JSON/MD、导出MD/JSON、搜索消息内容）、ConversationResource（含列表/过滤/导入/导出操作）、ViewConversation自定义查看页",
+      "files": []
+    }
+  ]
+}

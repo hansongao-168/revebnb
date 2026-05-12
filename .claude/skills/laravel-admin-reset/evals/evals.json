@@ -1,0 +1,23 @@
+{
+  "skill_name": "laravel-admin-reset",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Reset the admin account in this Laravel project to email: admin@82cf.com and password: test123",
+      "expected_output": "Successfully reset or created the admin user with the specified credentials, and verified it exists in the database",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Create a new admin user with email admin@test.com and password secret456 in this Laravel project",
+      "expected_output": "Successfully created the admin user with the specified credentials and verified it exists in the database",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I need to reset the admin password - the current admin email is admin@company.com and I want to set the password to MySecureP@ssw0rd!",
+      "expected_output": "Successfully reset the admin user password and verified the user can authenticate with the new password",
+      "files": []
+    }
+  ]
+}
