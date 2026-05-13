@@ -2,10 +2,12 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\Filament\LandlordPanelProvider;
 use App\Providers\Filament\TenantPanelProvider;
 
 return [
     AppServiceProvider::class,
     AdminPanelProvider::class,
     TenantPanelProvider::class,
+    LandlordPanelProvider::class,
 ];

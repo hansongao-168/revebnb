@@ -38,6 +38,8 @@ class LandlordPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
             ])
+            ->discoverResources(in: app_path('Filament/Landlord/Resources'), for: 'App\\Filament\\Landlord\\Resources')
+            ->discoverPages(in: app_path('Filament/Landlord/Pages'), for: 'App\\Filament\\Landlord\\Pages')
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

@@ -24,8 +24,6 @@ class CreateLandlord extends CreateRecord
 
     protected function afterCreate(): void
     {
-        parent::afterCreate();
-
         /** @var Landlord $landlord */
         $landlord = $this->getRecord();
         $tokens = app(LandlordTokenService::class);
