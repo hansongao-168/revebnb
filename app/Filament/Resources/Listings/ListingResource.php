@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class ListingResource extends Resource
@@ -39,6 +40,12 @@ class ListingResource extends Resource
     public static function table(Table $table): Table
     {
         return ListingsTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['images', 'landlord', 'tenant']);
     }
 
     public static function getRelations(): array

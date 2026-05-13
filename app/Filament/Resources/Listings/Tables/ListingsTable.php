@@ -6,6 +6,7 @@ use App\Models\Listing;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -23,9 +24,27 @@ class ListingsTable
                 TextColumn::make('city')
                     ->label('城市')
                     ->searchable(),
+                ImageColumn::make('cover_thumb')
+                    ->label('封面')
+                    ->getStateUsing(
+                        fn (Listing $record): ?string => $record->images
+                            ->sortBy([
+                                ['sort_order', 'asc'],
+                                ['id', 'asc'],
+                            ])
+                            ->first(fn ($image): bool => (bool) $image->is_cover)?->path
+                            ?? $record->images->sortBy([
+                                ['sort_order', 'asc'],
+                                ['id', 'asc'],
+                            ])->first()?->path
+                    )
+                    ->disk('public'),
                 TextColumn::make('nightly_price')
                     ->label('每晚')
                     ->money(fn (Listing $record): string => $record->currency ?: 'CNY')
+                    ->sortable(),
+                TextColumn::make('min_nights')
+                    ->label('最少晚数')
                     ->sortable(),
                 TextColumn::make('status')
                     ->label('状态')
@@ -42,6 +61,10 @@ class ListingsTable
                     }),
                 TextColumn::make('tenant.name')
                     ->label('租户')
+                    ->placeholder('—')
+                    ->toggleable(),
+                TextColumn::make('landlord.name')
+                    ->label('房东')
                     ->placeholder('—')
                     ->toggleable(),
                 TextColumn::make('published_at')

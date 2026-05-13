@@ -5,10 +5,14 @@ namespace App\Filament\Resources\Listings\Schemas;
 use App\Models\Listing;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListingForm
 {
@@ -42,16 +46,65 @@ class ListingForm
                     ->required()
                     ->default(Listing::STATUS_DRAFT)
                     ->native(false),
-                Textarea::make('description')
+                Select::make('landlord_id')
+                    ->label('房东')
+                    ->relationship(
+                        'landlord',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query, Get $get) => $query->when(
+                            $get('tenant_id'),
+                            fn (Builder $tenantQuery) => $tenantQuery->where('tenant_id', $get('tenant_id')),
+                        ),
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                TextInput::make('min_nights')
+                    ->label('最低预定晚数')
+                    ->numeric()
+                    ->required()
+                    ->default(1)
+                    ->minValue(1),
+                TextInput::make('max_guests')
+                    ->label('最大接待人数')
+                    ->numeric()
+                    ->minValue(1)
+                    ->nullable(),
+                RichEditor::make('description')
                     ->label('描述')
-                    ->rows(4)
                     ->columnSpanFull(),
+                RichEditor::make('guest_info_html')
+                    ->label('客人展示说明')
+                    ->columnSpanFull()
+                    ->nullable(),
                 TextInput::make('city')
                     ->label('城市')
                     ->maxLength(120),
                 TextInput::make('address')
                     ->label('地址')
                     ->maxLength(255),
+                Repeater::make('images')
+                    ->label('图片')
+                    ->relationship('images')
+                    ->schema([
+                        FileUpload::make('path')
+                            ->label('图片')
+                            ->image()
+                            ->disk('public')
+                            ->directory('listings')
+                            ->visibility('public')
+                            ->required(),
+                        TextInput::make('sort_order')
+                            ->numeric()
+                            ->default(0)
+                            ->label('排序'),
+                        Toggle::make('is_cover')
+                            ->label('封面')
+                            ->inline(false),
+                    ])
+                    ->defaultItems(0)
+                    ->columnSpanFull()
+                    ->collapsible(),
                 TextInput::make('nightly_price')
                     ->label('每晚价格')
                     ->numeric()
@@ -64,12 +117,6 @@ class ListingForm
                     ->length(3)
                     ->default('CNY')
                     ->maxLength(3),
-                FileUpload::make('cover_image')
-                    ->label('封面图')
-                    ->image()
-                    ->disk('public')
-                    ->directory('listings')
-                    ->visibility('public'),
                 DateTimePicker::make('published_at')
                     ->label('发布时间'),
             ]);
