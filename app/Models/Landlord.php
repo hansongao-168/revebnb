@@ -55,6 +55,12 @@ class Landlord extends Authenticatable implements FilamentUser
         return $this->hasMany(LandlordAccessToken::class);
     }
 
+    /** @return HasMany<Listing, $this> */
+    public function listings(): HasMany
+    {
+        return $this->hasMany(Listing::class);
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         if ($this->status !== self::STATUS_ACTIVE) {

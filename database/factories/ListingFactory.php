@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Landlord;
 use App\Models\Listing;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,6 +21,7 @@ class ListingFactory extends Factory
 
         return [
             'tenant_id' => null,
+            'landlord_id' => null,
             'title' => $title,
             'slug' => Str::slug($title).'-'.fake()->unique()->numerify('####'),
             'description' => implode("\n\n", fake()->paragraphs(2)),
@@ -28,7 +30,9 @@ class ListingFactory extends Factory
             'nightly_price' => fake()->randomFloat(2, 80, 800),
             'currency' => 'CNY',
             'status' => Listing::STATUS_DRAFT,
-            'cover_image' => null,
+            'min_nights' => 1,
+            'max_guests' => null,
+            'guest_info_html' => null,
             'published_at' => null,
         ];
     }
@@ -37,6 +41,14 @@ class ListingFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'tenant_id' => $tenant->id,
+        ]);
+    }
+
+    public function forLandlord(Landlord $landlord): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tenant_id' => $landlord->tenant_id,
+            'landlord_id' => $landlord->id,
         ]);
     }
 }
