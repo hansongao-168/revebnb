@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SaasUsers;
 
 use App\Filament\Resources\SaasUsers\Pages\EditSaasUser;
 use App\Filament\Resources\SaasUsers\Pages\ListSaasUsers;
+use App\Filament\Resources\SaasUsers\RelationManagers\PanelLoginTokensRelationManager;
 use App\Filament\Resources\SaasUsers\Schemas\SaasUserForm;
 use App\Filament\Resources\SaasUsers\Tables\SaasUsersTable;
 use App\Models\SaasUser;
@@ -41,7 +42,7 @@ class SaasUserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            PanelLoginTokensRelationManager::class,
         ];
     }
 

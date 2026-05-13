@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Tenants\Pages;
 
+use App\Contracts\PanelTokenNotifier;
 use App\Filament\Resources\Tenants\TenantResource;
+use App\Models\SaasPanelLoginToken;
 use App\Models\SaasUser;
 use App\Models\Tenant;
+use App\Services\SaasPanelLoginTokenIssuer;
 use App\Support\Auditor;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -31,7 +34,8 @@ class CreateTenant extends CreateRecord
 
             $plain = Str::password(20);
 
-            SaasUser::query()->create([
+            /** @var SaasUser $saasUser */
+            $saasUser = SaasUser::query()->create([
                 'tenant_id' => $tenant->id,
                 'name' => $ownerName,
                 'email' => $ownerEmail,
@@ -41,6 +45,19 @@ class CreateTenant extends CreateRecord
                 'email_verified_at' => now(),
             ]);
 
+            $issuer = app(SaasPanelLoginTokenIssuer::class);
+            $issued = $issuer->issue($saasUser, SaasPanelLoginToken::REASON_OWNER_PROVISION);
+            $entryUrl = $issuer->entryUrl($issued['plain']);
+            $expiresAt = $issued['token']->expires_at->clone();
+            DB::afterCommit(function () use ($saasUser, $entryUrl, $expiresAt): void {
+                app(PanelTokenNotifier::class)->sendIssued(
+                    $saasUser,
+                    $entryUrl,
+                    SaasPanelLoginToken::REASON_OWNER_PROVISION,
+                    $expiresAt,
+                );
+            });
+
             Auditor::recordFromGuard('web', 'tenant.created', $tenant, [
                 'owner_email' => $ownerEmail,
             ]);
@@ -48,6 +65,13 @@ class CreateTenant extends CreateRecord
             Notification::make()
                 ->title('Owner 初始密码（请立即复制）')
                 ->body($plain)
+                ->success()
+                ->persistent()
+                ->send();
+
+            Notification::make()
+                ->title('Owner 入口链接（请立即复制）')
+                ->body($entryUrl)
                 ->success()
                 ->persistent()
                 ->send();

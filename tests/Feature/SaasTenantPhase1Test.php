@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\Tenants\Pages\CreateTenant;
+use App\Mail\SaasPanelLoginTokenIssuedMail;
+use App\Models\SaasPanelLoginToken;
 use App\Models\SaasUser;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\TenantLifecycle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -26,6 +29,8 @@ class SaasTenantPhase1Test extends TestCase
 
     public function test_platform_admin_can_create_tenant_with_owner(): void
     {
+        Mail::fake();
+
         $admin = User::factory()->admin()->create();
         $this->actingAs($admin);
 
@@ -57,6 +62,15 @@ class SaasTenantPhase1Test extends TestCase
             'role' => 'owner',
         ]);
 
+        $ownerId = SaasUser::query()->where('tenant_id', $tenantId)->where('email', 'owner@acme.test')->value('id');
+
+        $this->assertDatabaseHas('saas_panel_login_tokens', [
+            'saas_user_id' => $ownerId,
+            'created_reason' => SaasPanelLoginToken::REASON_OWNER_PROVISION,
+        ]);
+
+        Mail::assertQueued(SaasPanelLoginTokenIssuedMail::class);
+
         $this->assertDatabaseHas('audit_logs', [
             'action' => 'tenant.created',
             'subject_type' => Tenant::class,
@@ -70,11 +84,25 @@ class SaasTenantPhase1Test extends TestCase
         $owner = SaasUser::factory()->for($tenant)->create();
         $owner->createToken('t');
 
+        SaasPanelLoginToken::query()->create([
+            'saas_user_id' => $owner->id,
+            'token_hash' => hash('sha256', str_repeat('p', (int) config('panel_tokens.plain_length', 48))),
+            'expires_at' => now()->addDay(),
+            'created_reason' => SaasPanelLoginToken::REASON_MANUAL,
+        ]);
+
         $this->assertGreaterThan(0, $owner->tokens()->count());
 
         app(TenantLifecycle::class)->suspend($tenant);
 
         $this->assertSame(0, $owner->fresh()->tokens()->count());
+        $this->assertSame(
+            0,
+            SaasPanelLoginToken::query()
+                ->where('saas_user_id', $owner->id)
+                ->whereNull('revoked_at')
+                ->count()
+        );
         $this->assertDatabaseHas('tenants', [
             'id' => $tenant->id,
             'status' => Tenant::STATUS_SUSPENDED,

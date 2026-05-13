@@ -7,6 +7,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -44,6 +45,12 @@ class SaasUser extends Authenticatable implements FilamentUser
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    /** @return HasMany<SaasPanelLoginToken, $this> */
+    public function panelLoginTokens(): HasMany
+    {
+        return $this->hasMany(SaasPanelLoginToken::class);
     }
 
     public function canAccessPanel(Panel $panel): bool
