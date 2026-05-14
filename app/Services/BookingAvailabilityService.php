@@ -90,6 +90,20 @@ class BookingAvailabilityService
         return $set;
     }
 
+    /**
+     * Nights unavailable for guest stays on the marketing site: confirmed bookings
+     * (half-open nights) plus landlord/platform unavailability (inclusive nights).
+     *
+     * @return array<string, true>
+     */
+    public function unavailableNightSetForSiteCalendar(int $listingId): array
+    {
+        $confirmed = $this->otherConfirmedNightSet($listingId, null);
+        $blocked = $this->blockNightSet($listingId);
+
+        return $confirmed + $blocked;
+    }
+
     public function assertMinNightsMet(Listing $listing, Carbon $checkIn, Carbon $checkOut): void
     {
         $nights = $checkIn->diffInDays($checkOut);
