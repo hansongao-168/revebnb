@@ -41,3 +41,17 @@ Route::get('/bookings/{booking}', [SiteGuestBookingController::class, 'show'])
 Route::view('/me/bookings', 'site.me.bookings')
     ->middleware(['throttle:60,1'])
     ->name('site.me.bookings');
+
+Route::view('/docs/stored-urls-intro', 'docs.stored-urls-intro')
+    ->middleware(['throttle:30,1'])
+    ->name('docs.stored-urls-intro');
+
+Route::get('/docs/stored-urls-intro.pdf', function () {
+    $path = public_path('docs/stored-urls-intro.pdf');
+
+    abort_unless(is_file($path), 404);
+
+    return response()->file($path, [
+        'Content-Type' => 'application/pdf',
+    ]);
+})->middleware(['throttle:30,1'])->name('docs.stored-urls-intro-pdf');
