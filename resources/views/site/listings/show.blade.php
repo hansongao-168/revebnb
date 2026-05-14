@@ -171,7 +171,19 @@
                     </div>
                 @endif
 
-                <div class="price-card rounded-2xl bg-white p-6 border border-ink-100">
+                @php
+                    $bookingCalendarConfig = [
+                        'slug' => $listing->slug,
+                        'nightlyPrice' => (float) $listing->nightly_price,
+                        'minNights' => (int) $listing->min_nights,
+                        'maxGuests' => (int) ($listing->max_guests ?? 10),
+                        'initialCheckIn' => old('check_in', $defaultCheckIn),
+                        'initialCheckOut' => old('check_out', $defaultCheckOut),
+                        'initialMonth' => \Illuminate\Support\Carbon::parse(old('check_in', $defaultCheckIn))->format('Y-m'),
+                    ];
+                @endphp
+                <div class="price-card rounded-2xl bg-white p-6 border border-ink-100"
+                     x-data="revebnbStayBooking({{ \Illuminate\Support\Js::from($bookingCalendarConfig) }})">
                     <div class="flex items-baseline justify-between">
                         <div>
                             <span class="text-2xl font-semibold text-ink-900">¥{{ number_format((float) $listing->nightly_price, 0) }}</span>
@@ -190,29 +202,63 @@
                     <form method="post" action="{{ route('site.bookings.store', $listing) }}" class="mt-5">
                         @csrf
 
-                        <div class="rounded-xl border border-ink-200 overflow-hidden">
-                            <div class="grid grid-cols-2 divide-x divide-ink-200">
-                                <label class="px-3 py-2.5 hover:bg-cream-100 transition cursor-pointer">
-                                    <span class="block text-[10px] uppercase tracking-[0.18em] text-ink-500 font-semibold">入住</span>
-                                    <input type="date" name="check_in"
-                                           value="{{ old('check_in', $defaultCheckIn) }}"
-                                           class="mt-1 w-full bg-transparent text-sm text-ink-900 focus:outline-none">
-                                </label>
-                                <label class="px-3 py-2.5 hover:bg-cream-100 transition cursor-pointer">
-                                    <span class="block text-[10px] uppercase tracking-[0.18em] text-ink-500 font-semibold">退房</span>
-                                    <input type="date" name="check_out"
-                                           value="{{ old('check_out', $defaultCheckOut) }}"
-                                           class="mt-1 w-full bg-transparent text-sm text-ink-900 focus:outline-none">
-                                </label>
+                        <input type="hidden" name="check_in" :value="checkIn">
+                        <input type="hidden" name="check_out" :value="checkOut">
+
+                        <div class="rounded-xl border border-ink-200 p-3">
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <button type="button" @click="prevMonth()"
+                                        class="rounded-full border border-ink-200 px-2 py-1 text-xs font-medium text-ink-700 hover:bg-ink-100 transition">
+                                    ‹
+                                </button>
+                                <span class="text-sm font-semibold text-ink-900" x-text="monthLabel()"></span>
+                                <button type="button" @click="nextMonth()"
+                                        class="rounded-full border border-ink-200 px-2 py-1 text-xs font-medium text-ink-700 hover:bg-ink-100 transition">
+                                    ›
+                                </button>
                             </div>
-                            <label class="block border-t border-ink-200 px-3 py-2.5 hover:bg-cream-100 transition cursor-pointer">
-                                <span class="block text-[10px] uppercase tracking-[0.18em] text-ink-500 font-semibold">旅客</span>
-                                <input type="number" name="guests"
-                                       min="1" max="{{ $listing->max_guests ?? 10 }}"
-                                       value="{{ old('guests', 2) }}"
-                                       class="mt-1 w-full bg-transparent text-sm text-ink-900 focus:outline-none">
-                            </label>
+                            <p class="text-[11px] text-ink-500 mb-2" x-show="loading" x-cloak>加载可订日期…</p>
+                            <div class="grid grid-cols-7 gap-0.5 text-center text-[10px] uppercase tracking-wide text-ink-400 mb-1">
+                                <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+                            </div>
+                            <div class="grid grid-cols-7 gap-0.5 text-xs">
+                                <template x-for="(cell, idx) in cells" :key="cell.empty ? 'e-' + idx : cell.dateStr">
+                                    <div>
+                                        <template x-if="cell.empty">
+                                            <span class="block h-8"></span>
+                                        </template>
+                                        <template x-if="!cell.empty">
+                                            <button type="button"
+                                                    @click="selectDay(cell.dateStr)"
+                                                    class="h-8 w-full rounded-lg flex items-center justify-center font-medium transition"
+                                                    :class="{
+                                                        'text-ink-300 cursor-not-allowed': cell.past || cell.blocked,
+                                                        'bg-coral-500 text-white': cell.isCheckIn || cell.isCheckOut,
+                                                        'bg-cream-100 text-ink-900': cell.inStayRange && !cell.isCheckIn && !cell.isCheckOut,
+                                                        'text-ink-800 hover:bg-ink-100': !cell.past && !cell.blocked && !cell.inStayRange && !cell.isCheckIn && !cell.isCheckOut,
+                                                        'line-through text-ink-300': cell.blocked && !cell.past
+                                                    }"
+                                                    :disabled="cell.past || cell.blocked"
+                                                    x-text="cell.dayNum">
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                            <p class="mt-2 text-[11px] text-ink-500">
+                                已选：<span class="font-medium text-ink-800" x-text="checkIn || '—'"></span>
+                                至 <span class="font-medium text-ink-800" x-text="checkOut || '—'"></span>
+                                <span class="text-ink-400">（灰色为不可订）</span>
+                            </p>
                         </div>
+
+                        <label class="block border border-ink-200 rounded-xl mt-3 px-3 py-2.5 hover:bg-cream-100 transition cursor-pointer">
+                            <span class="block text-[10px] uppercase tracking-[0.18em] text-ink-500 font-semibold">旅客</span>
+                            <input type="number" name="guests"
+                                   min="1" max="{{ $listing->max_guests ?? 10 }}"
+                                   value="{{ old('guests', 2) }}"
+                                   class="mt-1 w-full bg-transparent text-sm text-ink-900 focus:outline-none">
+                        </label>
 
                         <div class="mt-4 grid grid-cols-1 gap-3">
                             <label class="block">
@@ -248,23 +294,17 @@
                         </p>
                     </form>
 
-                    <div class="mt-6 border-t border-ink-100 pt-4 space-y-2 text-sm text-ink-700">
+                    <div class="mt-6 border-t border-ink-100 pt-4 space-y-2 text-sm text-ink-700" x-show="nightsCount() > 0" x-cloak>
                         <div class="flex items-center justify-between">
-                            <span class="underline underline-offset-4">¥{{ number_format((float) $listing->nightly_price, 0) }} × 3 晚</span>
-                            <span>¥{{ number_format((float) $listing->nightly_price * 3, 0) }}</span>
+                            <span>房费（估算）</span>
+                            <span>¥<span x-text="Math.round(roomSubtotal()).toLocaleString()"></span></span>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="underline underline-offset-4">清洁费</span>
-                            <span>¥120</span>
+                        <div class="flex items-center justify-between text-xs text-ink-500">
+                            <span x-text="'¥' + Math.round(nightlyPrice).toLocaleString() + ' × ' + nightsCount() + ' 晚'"></span>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="underline underline-offset-4">服务费</span>
-                            <span>¥80</span>
-                        </div>
-                        <div class="flex items-center justify-between border-t border-ink-100 pt-3 font-semibold text-ink-900">
-                            <span>合计</span>
-                            <span>¥{{ number_format((float) $listing->nightly_price * 3 + 200, 0) }}</span>
-                        </div>
+                        <p class="text-xs text-ink-500 pt-2 border-t border-ink-100">
+                            清洁费、服务费等以房东最终确认为准；此处仅为房费估算。
+                        </p>
                     </div>
                 </div>
 

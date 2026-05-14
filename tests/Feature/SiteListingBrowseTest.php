@@ -90,6 +90,23 @@ class SiteListingBrowseTest extends TestCase
         $this->get(route('site.stays.show', $listing))->assertNotFound();
     }
 
+    public function test_show_page_renders_stay_booking_calendar(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $landlord = Landlord::factory()->for($tenant)->create();
+
+        $listing = Listing::factory()->forLandlord($landlord)->create([
+            'status' => Listing::STATUS_PUBLISHED,
+            'published_at' => now()->subDay(),
+            'min_nights' => 1,
+        ]);
+
+        $this->get(route('site.stays.show', $listing))
+            ->assertOk()
+            ->assertSee('revebnbStayBooking')
+            ->assertSee('已选：');
+    }
+
     public function test_booking_inquiry_creates_pending_booking(): void
     {
         $tenant = Tenant::factory()->create();
