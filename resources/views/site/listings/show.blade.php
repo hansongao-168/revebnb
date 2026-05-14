@@ -160,12 +160,6 @@
         {{-- Booking card --}}
         <aside class="lg:col-span-1">
             <div class="lg:sticky lg:top-32">
-                @if (session('booking_inquiry_success'))
-                    <div class="mb-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800">
-                        预订请求已发送，房东会尽快与您确认。
-                    </div>
-                @endif
-
                 @if ($errors->any())
                     <div class="mb-4 rounded-2xl bg-coral-500/5 border border-coral-500/30 p-4 text-sm text-coral-700">
                         <p class="font-semibold mb-1">请检查以下信息：</p>
@@ -227,6 +221,13 @@
                                        value="{{ old('guest_name') }}"
                                        required
                                        placeholder="您的姓名"
+                                       class="mt-1 w-full rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-700 transition">
+                            </label>
+                            <label class="block">
+                                <span class="block text-[10px] uppercase tracking-[0.18em] text-ink-500 font-semibold">邮箱（选填）</span>
+                                <input type="email" name="guest_email"
+                                       value="{{ old('guest_email') }}"
+                                       placeholder="用于接收订单链接"
                                        class="mt-1 w-full rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-700 transition">
                             </label>
                             <label class="block">

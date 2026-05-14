@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\Enums\BookingStatus;
+use App\Mail\GuestBookingCreatedMail;
 use App\Models\Booking;
 use App\Models\Landlord;
 use App\Models\Listing;
 use App\Models\ListingUnavailabilityBlock;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class SiteListingBrowseTest extends TestCase
@@ -110,15 +112,67 @@ class SiteListingBrowseTest extends TestCase
             'notes' => '希望晚一点 check-in',
         ]);
 
-        $response->assertRedirect(route('site.stays.show', $listing));
-        $response->assertSessionHas('booking_inquiry_success', true);
-
         $booking = Booking::query()->where('listing_id', $listing->id)->latest('id')->first();
         $this->assertNotNull($booking);
+
+        $response->assertRedirect(route('site.bookings.confirmation', $booking));
+        $response->assertSessionHas('guest_booking_token');
+
         $this->assertSame('Mia', $booking->guest_name);
         $this->assertSame(BookingStatus::Pending, $booking->status);
         $this->assertSame($checkIn, $booking->check_in->toDateString());
         $this->assertSame($checkOut, $booking->check_out->toDateString());
+        $this->assertNotNull($booking->guest_access_token_hash);
+        $this->assertNotNull($booking->guest_access_token_expires_at);
+    }
+
+    public function test_booking_inquiry_with_guest_email_queues_confirmation_mail(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $landlord = Landlord::factory()->for($tenant)->create();
+
+        $listing = Listing::factory()->forLandlord($landlord)->create([
+            'status' => Listing::STATUS_PUBLISHED,
+            'published_at' => now()->subDay(),
+            'min_nights' => 1,
+        ]);
+
+        Mail::fake();
+
+        $this->post(route('site.bookings.store', $listing), [
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(8)->toDateString(),
+            'guests' => 2,
+            'guest_name' => 'Mia',
+            'guest_email' => 'mia@example.com',
+        ])->assertRedirect();
+
+        Mail::assertQueued(GuestBookingCreatedMail::class, function (GuestBookingCreatedMail $mail): bool {
+            return $mail->hasTo('mia@example.com');
+        });
+    }
+
+    public function test_booking_inquiry_without_guest_email_does_not_send_mail(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $landlord = Landlord::factory()->for($tenant)->create();
+
+        $listing = Listing::factory()->forLandlord($landlord)->create([
+            'status' => Listing::STATUS_PUBLISHED,
+            'published_at' => now()->subDay(),
+            'min_nights' => 1,
+        ]);
+
+        Mail::fake();
+
+        $this->post(route('site.bookings.store', $listing), [
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(8)->toDateString(),
+            'guests' => 2,
+            'guest_name' => 'Mia',
+        ])->assertRedirect();
+
+        Mail::assertNothingOutgoing();
     }
 
     public function test_booking_inquiry_rejects_conflict_with_confirmed_booking(): void
@@ -187,5 +241,45 @@ class SiteListingBrowseTest extends TestCase
 
         $response->assertRedirect(route('site.stays.show', $listing));
         $response->assertSessionHasErrors('check_in');
+    }
+
+    public function test_booking_show_with_valid_token_returns_ok(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $landlord = Landlord::factory()->for($tenant)->create();
+
+        $listing = Listing::factory()->forLandlord($landlord)->create([
+            'title' => 'Token View Stay',
+            'status' => Listing::STATUS_PUBLISHED,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $booking = Booking::factory()->create([
+            'listing_id' => $listing->id,
+            'status' => BookingStatus::Pending,
+            'guest_name' => 'Known Guest',
+            'guest_access_token_hash' => hash('sha256', 'known-plain'),
+            'guest_access_token_expires_at' => now()->addDay(),
+        ]);
+
+        $this->get(route('site.bookings.show', $booking).'?token=known-plain')
+            ->assertOk()
+            ->assertSee('Known Guest');
+    }
+
+    public function test_booking_confirmation_without_flash_returns_404(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $landlord = Landlord::factory()->for($tenant)->create();
+        $listing = Listing::factory()->forLandlord($landlord)->create();
+
+        $booking = Booking::factory()->create([
+            'listing_id' => $listing->id,
+            'guest_access_token_hash' => hash('sha256', 'known-plain'),
+            'guest_access_token_expires_at' => now()->addDay(),
+        ]);
+
+        $this->get(route('site.bookings.confirmation', $booking))
+            ->assertNotFound();
     }
 }

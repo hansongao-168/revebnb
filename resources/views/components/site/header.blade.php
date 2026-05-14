@@ -20,6 +20,9 @@
             <a href="{{ route('site.stays.index') }}"
                class="nav-link"
                data-active="{{ $active === 'stays' ? 'true' : 'false' }}">住宿</a>
+            <a href="{{ route('site.me.bookings') }}"
+               class="nav-link"
+               data-active="{{ $active === 'bookings' ? 'true' : 'false' }}">我的订单</a>
             <a href="{{ route('site.stays.index', ['kind' => 'experiences']) }}" class="nav-link text-ink-400">体验</a>
             <a href="{{ route('site.stays.index', ['kind' => 'long-stay']) }}" class="nav-link text-ink-400">长租</a>
         </nav>
