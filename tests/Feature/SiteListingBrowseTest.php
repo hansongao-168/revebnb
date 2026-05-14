@@ -22,6 +22,14 @@ class SiteListingBrowseTest extends TestCase
         $this->get('/')->assertRedirect('/stays');
     }
 
+    public function test_me_bookings_page_renders(): void
+    {
+        $this->get(route('site.me.bookings'))
+            ->assertOk()
+            ->assertSee('我的订单')
+            ->assertSee('暂无订单');
+    }
+
     public function test_browse_page_shows_only_published_listings(): void
     {
         $tenant = Tenant::factory()->create();
