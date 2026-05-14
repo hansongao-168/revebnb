@@ -24,7 +24,11 @@ class BookingFactory extends Factory
             'check_in' => now()->toDateString(),
             'check_out' => now()->addDays(2)->toDateString(),
             'status' => BookingStatus::Draft,
+            'guests' => null,
             'guest_name' => null,
+            'guest_email' => null,
+            'guest_access_token_hash' => null,
+            'guest_access_token_expires_at' => null,
             'notes' => null,
         ];
     }

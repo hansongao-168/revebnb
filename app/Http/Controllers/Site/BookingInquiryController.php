@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Site;
 
 use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Site\StoreBookingInquiryRequest;
+use App\Http\Requests\Site\StoreSiteBookingRequest;
 use App\Models\Booking;
 use App\Models\Listing;
 use App\Services\BookingAvailabilityService;
@@ -15,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 class BookingInquiryController extends Controller
 {
     public function store(
-        StoreBookingInquiryRequest $request,
+        StoreSiteBookingRequest $request,
         Listing $listing,
         BookingAvailabilityService $availability,
     ): RedirectResponse {

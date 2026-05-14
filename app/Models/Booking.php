@@ -18,7 +18,11 @@ class Booking extends Model
         'check_in',
         'check_out',
         'status',
+        'guests',
         'guest_name',
+        'guest_email',
+        'guest_access_token_hash',
+        'guest_access_token_expires_at',
         'notes',
     ];
 
@@ -28,6 +32,7 @@ class Booking extends Model
             'check_in' => 'date',
             'check_out' => 'date',
             'status' => BookingStatus::class,
+            'guest_access_token_expires_at' => 'datetime',
         ];
     }
 
