@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Listings\Pages;
 use App\Filament\Resources\Listings\ListingResource;
 use App\Models\Listing;
 use App\Services\RichTextSanitizerService;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -15,6 +16,10 @@ class EditListing extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('calendarComparison')
+                ->label('日历对比')
+                ->icon('heroicon-o-calendar-days')
+                ->url(fn (): string => ListingResource::getUrl('calendar', ['record' => $this->getRecord()])),
             DeleteAction::make(),
         ];
     }

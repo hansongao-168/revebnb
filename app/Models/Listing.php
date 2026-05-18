@@ -107,4 +107,10 @@ class Listing extends Model
     {
         return $this->hasMany(ListingUnavailabilityBlock::class);
     }
+
+    /** @return HasMany<ListingCalendarFeed, $this> */
+    public function calendarFeeds(): HasMany
+    {
+        return $this->hasMany(ListingCalendarFeed::class);
+    }
 }

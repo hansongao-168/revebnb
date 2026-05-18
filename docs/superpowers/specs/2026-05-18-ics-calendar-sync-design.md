@@ -1,7 +1,7 @@
 # 平台后台 ICS 外部日历同步与对比 — 设计说明
 
 **日期**: 2026-05-18  
-**状态**: 已定稿（请通读本文件并确认后进入 implementation plan）  
+**状态**: 已实现（2026-05-18）  
 **依赖**:
 
 - `docs/superpowers/specs/2026-05-13-listings-availability-bookings-design.md`（`listings`、`bookings`、`listing_unavailability_blocks`、`BookingAvailabilityService`）

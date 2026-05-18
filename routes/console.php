@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('panel-tokens:rotate-expired')->hourly();
+Schedule::command('calendar-feeds:sync-due')->hourly();

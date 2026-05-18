@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Listings;
 use App\Filament\Resources\Listings\Pages\CreateListing;
 use App\Filament\Resources\Listings\Pages\EditListing;
 use App\Filament\Resources\Listings\Pages\ListListings;
+use App\Filament\Resources\Listings\Pages\ViewListingCalendarComparison;
+use App\Filament\Resources\Listings\RelationManagers\ListingCalendarFeedsRelationManager;
 use App\Filament\Resources\Listings\Schemas\ListingForm;
 use App\Filament\Resources\Listings\Tables\ListingsTable;
 use App\Models\Listing;
@@ -50,7 +52,9 @@ class ListingResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            ListingCalendarFeedsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
@@ -59,6 +63,7 @@ class ListingResource extends Resource
             'index' => ListListings::route('/'),
             'create' => CreateListing::route('/create'),
             'edit' => EditListing::route('/{record}/edit'),
+            'calendar' => ViewListingCalendarComparison::route('/{record}/calendar'),
         ];
     }
 }
