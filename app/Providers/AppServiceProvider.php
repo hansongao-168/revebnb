@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Contracts\PanelTokenNotifier;
 use App\Services\MailPanelTokenNotifier;
+use App\Site\View\Composers\SiteNavigationComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +26,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer([
+            'components.layouts.site',
+            'components.site.header',
+            'components.site.footer',
+            'components.site.category-strip',
+        ], SiteNavigationComposer::class);
+
         RateLimiter::for('panel-token-entry', function (Request $request): Limit {
             $token = (string) $request->route('token', '');
 

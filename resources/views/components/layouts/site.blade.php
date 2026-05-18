@@ -12,7 +12,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="site-body min-h-screen flex flex-col">
-    <x-site.header :active="$navActive ?? 'stays'" />
+    <x-site.header />
 
     <main class="flex-1">
         {{ $slot }}

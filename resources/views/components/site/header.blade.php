@@ -1,6 +1,7 @@
-@props([
-    'active' => 'stays',
-])
+@php
+    $headerNav = collect($siteNav['header'] ?? [])->filter(fn ($item) => $item->styleVariant !== 'button');
+    $headerActions = collect($siteNav['header'] ?? [])->filter(fn ($item) => $item->styleVariant === 'button');
+@endphp
 
 <header class="sticky top-0 z-40 border-b border-ink-100 bg-cream-50/85 backdrop-blur-md">
     <div class="site-shell flex items-center justify-between h-20">
@@ -17,21 +18,22 @@
         </a>
 
         <nav class="hidden md:flex items-center gap-10 text-[0.95rem] font-medium text-ink-700">
-            <a href="{{ route('site.stays.index') }}"
-               class="nav-link"
-               data-active="{{ $active === 'stays' ? 'true' : 'false' }}">住宿</a>
-            <a href="{{ route('site.me.bookings') }}"
-               class="nav-link"
-               data-active="{{ $active === 'bookings' ? 'true' : 'false' }}">我的订单</a>
-            <a href="{{ route('site.stays.index', ['kind' => 'experiences']) }}" class="nav-link text-ink-400">体验</a>
-            <a href="{{ route('site.stays.index', ['kind' => 'long-stay']) }}" class="nav-link text-ink-400">长租</a>
+            @foreach ($headerNav as $item)
+                <a href="{{ $item->href() }}"
+                   target="{{ $item->target }}"
+                   class="nav-link {{ $item->styleVariant === 'muted' ? 'text-ink-400' : '' }}"
+                   data-active="{{ $item->isActive ? 'true' : 'false' }}">{{ $item->title }}</a>
+            @endforeach
         </nav>
 
         <div class="flex items-center gap-2">
-            <a href="{{ url('/landlord-portal/login') }}"
-               class="hidden sm:inline-flex items-center text-sm font-medium text-ink-700 px-4 py-2 rounded-full hover:bg-ink-100 transition">
-                成为房东
-            </a>
+            @foreach ($headerActions as $item)
+                <a href="{{ $item->href() }}"
+                   target="{{ $item->target }}"
+                   class="hidden sm:inline-flex items-center text-sm font-medium text-ink-700 px-4 py-2 rounded-full hover:bg-ink-100 transition">
+                    {{ $item->title }}
+                </a>
+            @endforeach
 
             <button type="button"
                     class="inline-flex items-center gap-2 rounded-full border border-ink-200 bg-white py-1.5 pl-3 pr-1.5 text-ink-700 hover:shadow-md transition">

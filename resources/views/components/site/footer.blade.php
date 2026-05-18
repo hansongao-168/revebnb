@@ -10,28 +10,33 @@
         <div>
             <p class="text-[11px] uppercase tracking-[0.32em] text-ink-400 mb-3">探索</p>
             <ul class="space-y-2">
-                <li><a class="hover:text-ink-900 transition" href="{{ route('site.stays.index') }}">所有住宿</a></li>
-                <li><a class="hover:text-ink-900 transition" href="#">编辑精选</a></li>
-                <li><a class="hover:text-ink-900 transition" href="#">城市指南</a></li>
-                <li><a class="hover:text-ink-900 transition" href="#">长期旅居</a></li>
+                @foreach ($siteNav['footer']['explore'] ?? [] as $item)
+                    <li>
+                        <a class="hover:text-ink-900 transition" href="{{ $item->href() }}" target="{{ $item->target }}">{{ $item->title }}</a>
+                    </li>
+                @endforeach
             </ul>
         </div>
 
         <div>
             <p class="text-[11px] uppercase tracking-[0.32em] text-ink-400 mb-3">房东</p>
             <ul class="space-y-2">
-                <li><a class="hover:text-ink-900 transition" href="{{ url('/landlord-portal/login') }}">房东登录</a></li>
-                <li><a class="hover:text-ink-900 transition" href="#">挂牌房源</a></li>
-                <li><a class="hover:text-ink-900 transition" href="#">收益预估</a></li>
+                @foreach ($siteNav['footer']['landlord'] ?? [] as $item)
+                    <li>
+                        <a class="hover:text-ink-900 transition" href="{{ $item->href() }}" target="{{ $item->target }}">{{ $item->title }}</a>
+                    </li>
+                @endforeach
             </ul>
         </div>
 
         <div>
             <p class="text-[11px] uppercase tracking-[0.32em] text-ink-400 mb-3">支持</p>
             <ul class="space-y-2">
-                <li><a class="hover:text-ink-900 transition" href="#">帮助中心</a></li>
-                <li><a class="hover:text-ink-900 transition" href="#">退订政策</a></li>
-                <li><a class="hover:text-ink-900 transition" href="#">隐私与条款</a></li>
+                @foreach ($siteNav['footer']['support'] ?? [] as $item)
+                    <li>
+                        <a class="hover:text-ink-900 transition" href="{{ $item->href() }}" target="{{ $item->target }}">{{ $item->title }}</a>
+                    </li>
+                @endforeach
             </ul>
         </div>
     </div>

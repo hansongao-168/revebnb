@@ -38,7 +38,7 @@ Route::get('/bookings/{booking}', [SiteGuestBookingController::class, 'show'])
     ->middleware(['throttle:60,1'])
     ->name('site.bookings.show');
 
-Route::view('/me/bookings', 'site.me.bookings')
+Route::view('/me/bookings', 'site.modules.account.bookings')
     ->middleware(['throttle:60,1'])
     ->name('site.me.bookings');
 

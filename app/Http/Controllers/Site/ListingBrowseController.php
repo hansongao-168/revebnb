@@ -44,7 +44,7 @@ class ListingBrowseController extends Controller
         /** @var LengthAwarePaginator<int, Listing> $listings */
         $listings = $query->orderByDesc('published_at')->paginate(12)->withQueryString();
 
-        return view('site.listings.index', [
+        return view('site.modules.stays.index', [
             'listings' => $listings,
             'filters' => $filters,
         ]);
@@ -56,7 +56,7 @@ class ListingBrowseController extends Controller
 
         $listing->load(['images', 'landlord:id,name']);
 
-        return view('site.listings.show', [
+        return view('site.modules.stays.show', [
             'listing' => $listing,
             'defaultCheckIn' => now()->addDays(7)->toDateString(),
             'defaultCheckOut' => now()->addDays(10)->toDateString(),

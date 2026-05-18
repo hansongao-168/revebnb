@@ -85,7 +85,7 @@ class SiteGuestBookingController extends Controller
         $booking->load('listing');
         $detailUrl = route('site.bookings.show', ['booking' => $booking, 'token' => $plain]);
 
-        return view('site.bookings.confirmation', compact('booking', 'detailUrl'));
+        return view('site.modules.bookings.confirmation', compact('booking', 'detailUrl'));
     }
 
     public function show(Request $request, Booking $booking, GuestBookingAccessTokenService $tokens): View
@@ -104,7 +104,7 @@ class SiteGuestBookingController extends Controller
 
         $booking->load('listing');
 
-        return view('site.bookings.show', compact('booking'));
+        return view('site.modules.bookings.show', compact('booking'));
     }
 
     /** @param array<string, mixed> $data */
