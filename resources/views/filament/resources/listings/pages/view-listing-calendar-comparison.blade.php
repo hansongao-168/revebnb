@@ -6,10 +6,16 @@
     @endphp
 
     <div class="space-y-6">
+        @if (Filament\Facades\Filament::getCurrentPanel()?->getId() === 'landlord')
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                外部 ICS 订阅由平台在后台配置与同步；此页仅供查看占用对比。
+            </p>
+        @endif
+
         <div class="flex flex-wrap items-center gap-3">
             <x-filament::button
                 tag="a"
-                :href="\App\Filament\Resources\Listings\ListingResource::getUrl('edit', ['record' => $record])"
+                :href="$this->getResource()::getUrl('edit', ['record' => $this->getRecord()])"
                 color="gray"
                 icon="heroicon-o-arrow-left"
             >

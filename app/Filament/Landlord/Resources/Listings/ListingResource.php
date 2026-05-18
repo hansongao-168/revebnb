@@ -5,6 +5,7 @@ namespace App\Filament\Landlord\Resources\Listings;
 use App\Filament\Landlord\Resources\Listings\Pages\CreateListing;
 use App\Filament\Landlord\Resources\Listings\Pages\EditListing;
 use App\Filament\Landlord\Resources\Listings\Pages\ListListings;
+use App\Filament\Landlord\Resources\Listings\Pages\ViewListingCalendarComparison;
 use App\Filament\Landlord\Resources\Listings\Schemas\ListingForm;
 use App\Filament\Landlord\Resources\Listings\Tables\ListingsTable;
 use App\Models\Landlord;
@@ -64,6 +65,7 @@ class ListingResource extends Resource
             'index' => ListListings::route('/'),
             'create' => CreateListing::route('/create'),
             'edit' => EditListing::route('/{record}/edit'),
+            'calendar' => ViewListingCalendarComparison::route('/{record}/calendar'),
         ];
     }
 }
