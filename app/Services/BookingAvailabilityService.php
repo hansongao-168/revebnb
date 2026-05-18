@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\ExternalCalendarEvent;
 use App\Models\Listing;
+use App\Models\ListingCalendarFeed;
 use App\Models\ListingUnavailabilityBlock;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -91,8 +93,40 @@ class BookingAvailabilityService
     }
 
     /**
+     * Nights blocked by external ICS feeds opted into site availability.
+     *
+     * @return array<string, true>
+     */
+    public function externalCalendarNightSet(int $listingId): array
+    {
+        $set = [];
+
+        $feedIds = ListingCalendarFeed::query()
+            ->where('listing_id', $listingId)
+            ->where('merge_into_site_availability', true)
+            ->pluck('id');
+
+        if ($feedIds->isEmpty()) {
+            return $set;
+        }
+
+        foreach (
+            ExternalCalendarEvent::query()
+                ->whereIn('listing_calendar_feed_id', $feedIds)
+                ->cursor() as $event
+        ) {
+            foreach ($event->blocked_nights ?? [] as $night) {
+                $set[$night] = true;
+            }
+        }
+
+        return $set;
+    }
+
+    /**
      * Nights unavailable for guest stays on the marketing site: confirmed bookings
-     * (half-open nights) plus landlord/platform unavailability (inclusive nights).
+     * (half-open nights), landlord/platform unavailability (inclusive nights),
+     * and optionally external ICS events when enabled per feed.
      *
      * @return array<string, true>
      */
@@ -100,8 +134,9 @@ class BookingAvailabilityService
     {
         $confirmed = $this->otherConfirmedNightSet($listingId, null);
         $blocked = $this->blockNightSet($listingId);
+        $external = $this->externalCalendarNightSet($listingId);
 
-        return $confirmed + $blocked;
+        return $confirmed + $blocked + $external;
     }
 
     public function assertMinNightsMet(Listing $listing, Carbon $checkIn, Carbon $checkOut): void
@@ -139,6 +174,7 @@ class BookingAvailabilityService
         $ignoreId = $ignoreBookingId ?? ($booking->exists ? $booking->id : null);
         $other = $this->otherConfirmedNightSet($booking->listing_id, $ignoreId);
         $blocks = $this->blockNightSet($booking->listing_id);
+        $external = $this->externalCalendarNightSet($booking->listing_id);
 
         foreach ($candidate as $night) {
             if (isset($other[$night])) {
@@ -150,6 +186,12 @@ class BookingAvailabilityService
             if (isset($blocks[$night])) {
                 throw ValidationException::withMessages([
                     'check_in' => '所选日期落在手动不可租区间内。',
+                ]);
+            }
+
+            if (isset($external[$night])) {
+                throw ValidationException::withMessages([
+                    'check_in' => '所选日期与外部日历（如 Airbnb）占用冲突。',
                 ]);
             }
         }

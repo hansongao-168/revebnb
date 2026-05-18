@@ -20,6 +20,7 @@ class ListingCalendarFeed extends Model
         'source',
         'ical_url',
         'is_enabled',
+        'merge_into_site_availability',
         'sync_interval_hours',
         'last_synced_at',
         'last_successful_sync_at',
@@ -32,6 +33,7 @@ class ListingCalendarFeed extends Model
         return [
             'ical_url' => 'encrypted',
             'is_enabled' => 'boolean',
+            'merge_into_site_availability' => 'boolean',
             'sync_interval_hours' => 'integer',
             'last_synced_at' => 'datetime',
             'last_successful_sync_at' => 'datetime',

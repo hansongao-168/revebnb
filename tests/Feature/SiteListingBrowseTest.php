@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Enums\BookingStatus;
 use App\Mail\GuestBookingCreatedMail;
 use App\Models\Booking;
+use App\Models\ExternalCalendarEvent;
 use App\Models\Landlord;
 use App\Models\Listing;
+use App\Models\ListingCalendarFeed;
 use App\Models\ListingUnavailabilityBlock;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -309,6 +311,40 @@ class SiteListingBrowseTest extends TestCase
                 'check_out' => now()->addDays(7)->toDateString(),
                 'guests' => 2,
                 'guest_name' => 'Blocked Bird',
+            ]);
+
+        $response->assertRedirect(route('site.stays.show', $listing));
+        $response->assertSessionHasErrors('check_in');
+    }
+
+    public function test_booking_inquiry_rejects_dates_blocked_by_merged_external_calendar(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $landlord = Landlord::factory()->for($tenant)->create();
+
+        $listing = Listing::factory()->forLandlord($landlord)->create([
+            'status' => Listing::STATUS_PUBLISHED,
+            'published_at' => now()->subDay(),
+            'min_nights' => 1,
+        ]);
+
+        $feed = ListingCalendarFeed::factory()
+            ->blocksSiteAvailability()
+            ->create(['listing_id' => $listing->id]);
+
+        ExternalCalendarEvent::factory()->create([
+            'listing_calendar_feed_id' => $feed->id,
+            'blocked_nights' => [
+                now()->addDays(6)->toDateString(),
+            ],
+        ]);
+
+        $response = $this->from(route('site.stays.show', $listing))
+            ->post(route('site.bookings.store', $listing), [
+                'check_in' => now()->addDays(6)->toDateString(),
+                'check_out' => now()->addDays(7)->toDateString(),
+                'guests' => 2,
+                'guest_name' => 'ICS Blocked',
             ]);
 
         $response->assertRedirect(route('site.stays.show', $listing));

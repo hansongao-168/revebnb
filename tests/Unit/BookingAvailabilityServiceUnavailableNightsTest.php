@@ -4,8 +4,10 @@ namespace Tests\Unit;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\ExternalCalendarEvent;
 use App\Models\Landlord;
 use App\Models\Listing;
+use App\Models\ListingCalendarFeed;
 use App\Models\ListingUnavailabilityBlock;
 use App\Models\Tenant;
 use App\Services\BookingAvailabilityService;
@@ -49,5 +51,45 @@ class BookingAvailabilityServiceUnavailableNightsTest extends TestCase
         $this->assertArrayNotHasKey('2026-07-04', $set);
         $this->assertArrayHasKey('2026-07-10', $set);
         $this->assertArrayHasKey('2026-07-12', $set);
+    }
+
+    #[Test]
+    public function external_calendar_nights_merge_when_feed_opted_in(): void
+    {
+        $listing = Listing::factory()->create();
+        $feed = ListingCalendarFeed::factory()
+            ->blocksSiteAvailability()
+            ->create(['listing_id' => $listing->id]);
+
+        ExternalCalendarEvent::factory()->create([
+            'listing_calendar_feed_id' => $feed->id,
+            'blocked_nights' => ['2026-09-05', '2026-09-06'],
+        ]);
+
+        $svc = new BookingAvailabilityService;
+        $set = $svc->unavailableNightSetForSiteCalendar($listing->id);
+
+        $this->assertArrayHasKey('2026-09-05', $set);
+        $this->assertArrayHasKey('2026-09-06', $set);
+    }
+
+    #[Test]
+    public function external_calendar_nights_ignored_when_feed_not_opted_in(): void
+    {
+        $listing = Listing::factory()->create();
+        $feed = ListingCalendarFeed::factory()->create([
+            'listing_id' => $listing->id,
+            'merge_into_site_availability' => false,
+        ]);
+
+        ExternalCalendarEvent::factory()->create([
+            'listing_calendar_feed_id' => $feed->id,
+            'blocked_nights' => ['2026-09-05'],
+        ]);
+
+        $svc = new BookingAvailabilityService;
+        $set = $svc->unavailableNightSetForSiteCalendar($listing->id);
+
+        $this->assertArrayNotHasKey('2026-09-05', $set);
     }
 }

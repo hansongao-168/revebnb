@@ -21,6 +21,7 @@ class ListingCalendarFeedFactory extends Factory
             'source' => 'airbnb',
             'ical_url' => 'https://www.airbnb.fr/calendar/ical/'.fake()->numerify('################').'.ics?t='.fake()->uuid(),
             'is_enabled' => true,
+            'merge_into_site_availability' => false,
             'sync_interval_hours' => null,
             'last_synced_at' => null,
             'last_successful_sync_at' => null,
@@ -33,6 +34,13 @@ class ListingCalendarFeedFactory extends Factory
     {
         return $this->state(fn (): array => [
             'is_enabled' => false,
+        ]);
+    }
+
+    public function blocksSiteAvailability(): static
+    {
+        return $this->state(fn (): array => [
+            'merge_into_site_availability' => true,
         ]);
     }
 }

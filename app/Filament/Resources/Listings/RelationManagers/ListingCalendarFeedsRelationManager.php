@@ -46,6 +46,10 @@ class ListingCalendarFeedsRelationManager extends RelationManager
             Toggle::make('is_enabled')
                 ->label('启用同步')
                 ->default(true),
+            Toggle::make('merge_into_site_availability')
+                ->label('合并进前台可订')
+                ->helperText('开启后，该 feed 同步的外部占用日期将阻挡访客在 /stays 预订。')
+                ->default(false),
             TextInput::make('sync_interval_hours')
                 ->label('同步间隔（小时）')
                 ->numeric()
@@ -68,6 +72,9 @@ class ListingCalendarFeedsRelationManager extends RelationManager
                     ->toggleable(),
                 IconColumn::make('is_enabled')
                     ->label('启用')
+                    ->boolean(),
+                IconColumn::make('merge_into_site_availability')
+                    ->label('挡前台')
                     ->boolean(),
                 TextColumn::make('sync_interval_hours')
                     ->label('间隔(h)')
