@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 use Throwable;
 
 class ListingCalendarFeedsRelationManager extends RelationManager
@@ -42,6 +43,9 @@ class ListingCalendarFeedsRelationManager extends RelationManager
                 ->required(fn (string $operation): bool => $operation === 'create')
                 ->dehydrated(fn (?string $state): bool => filled($state))
                 ->maxLength(2000)
+                ->helperText(new HtmlString(
+                    '<a href="'.e(route('docs.ics-external-calendar').'#airbnb-ical').'" target="_blank" rel="noopener noreferrer" class="underline">获取 Airbnb iCal 链接</a>'
+                ))
                 ->columnSpanFull(),
             Toggle::make('is_enabled')
                 ->label('启用同步')

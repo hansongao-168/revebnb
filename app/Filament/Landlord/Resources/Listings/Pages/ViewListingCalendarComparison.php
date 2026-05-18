@@ -2,6 +2,7 @@
 
 namespace App\Filament\Landlord\Resources\Listings\Pages;
 
+use App\Filament\Concerns\HasListingCalendarComparisonHeaderActions;
 use App\Filament\Landlord\Resources\Listings\ListingResource;
 use App\Models\Listing;
 use App\Services\ListingCalendarComparisonService;
@@ -11,6 +12,7 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class ViewListingCalendarComparison extends Page
 {
+    use HasListingCalendarComparisonHeaderActions;
     use InteractsWithRecord;
 
     protected static string $resource = ListingResource::class;

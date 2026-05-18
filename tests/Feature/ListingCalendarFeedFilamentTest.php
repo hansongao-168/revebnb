@@ -82,6 +82,19 @@ class ListingCalendarFeedFilamentTest extends TestCase
             ->assertOk()
             ->assertSee('日历对比')
             ->assertSee('当月外部事件')
-            ->assertSee('Reserved');
+            ->assertSee('Reserved')
+            ->assertSee('获取 Airbnb iCal 链接');
+    }
+
+    public function test_calendar_comparison_page_shows_ical_help_when_no_external_events(): void
+    {
+        $listing = Listing::factory()->forLandlord(Landlord::factory()->create())->create();
+
+        $this->actingAs(User::factory()->admin()->create());
+
+        Livewire::test(ViewListingCalendarComparison::class, ['record' => $listing->id])
+            ->assertOk()
+            ->assertSee('获取 Airbnb iCal 链接')
+            ->assertSeeHtml('href="'.route('docs.ics-external-calendar').'#airbnb-ical"');
     }
 }

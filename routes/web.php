@@ -46,6 +46,10 @@ Route::view('/docs/stored-urls-intro', 'docs.stored-urls-intro')
     ->middleware(['throttle:30,1'])
     ->name('docs.stored-urls-intro');
 
+Route::view('/docs/ics-external-calendar', 'docs.ics-external-calendar')
+    ->middleware(['throttle:30,1'])
+    ->name('docs.ics-external-calendar');
+
 Route::get('/docs/stored-urls-intro.pdf', function () {
     $path = public_path('docs/stored-urls-intro.pdf');
 
