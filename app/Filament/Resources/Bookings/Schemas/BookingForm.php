@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Bookings\Schemas;
 
 use App\Enums\BookingStatus;
+use App\Filament\Support\GuestCountFormFields;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -38,6 +39,7 @@ class BookingForm
                     ->required()
                     ->default(BookingStatus::Draft->value)
                     ->native(false),
+                ...GuestCountFormFields::schema(),
                 TextInput::make('guest_name')
                     ->label('入住人')
                     ->maxLength(255)

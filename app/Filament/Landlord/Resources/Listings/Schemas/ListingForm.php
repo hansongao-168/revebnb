@@ -2,6 +2,7 @@
 
 namespace App\Filament\Landlord\Resources\Listings\Schemas;
 
+use App\Filament\Support\GuestCapacityFormFields;
 use App\Models\Landlord;
 use App\Models\Listing;
 use Filament\Forms\Components\DateTimePicker;
@@ -52,11 +53,7 @@ class ListingForm
                     ->required()
                     ->default(1)
                     ->minValue(1),
-                TextInput::make('max_guests')
-                    ->label('最大接待人数')
-                    ->numeric()
-                    ->minValue(1)
-                    ->nullable(),
+                ...GuestCapacityFormFields::schema(),
                 RichEditor::make('description')
                     ->label('描述')
                     ->columnSpanFull(),

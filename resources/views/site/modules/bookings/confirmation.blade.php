@@ -30,6 +30,12 @@
                     <span class="text-ink-500">旅客</span>
                     <span class="text-right font-semibold text-ink-900">{{ $booking->guest_name }}</span>
                 </div>
+                @if ($booking->guest_adults !== null || $booking->guests)
+                    <div class="flex items-center justify-between gap-4">
+                        <span class="text-ink-500">人数</span>
+                        <span class="text-right font-semibold text-ink-900">{{ $booking->guestComposition()->label() }}</span>
+                    </div>
+                @endif
             </div>
 
             <div class="mt-8">

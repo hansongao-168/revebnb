@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
 use App\Models\Listing;
+use App\Support\GuestComposition;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -12,12 +13,14 @@ class ListingBrowseController extends Controller
 {
     public function index(Request $request): View
     {
+        $guests = GuestComposition::fromRequest($request);
+
         $filters = [
             'destination' => $request->string('destination')->trim()->value(),
             'check_in' => $request->date('check_in')?->toDateString(),
             'check_out' => $request->date('check_out')?->toDateString(),
-            'guests' => $request->integer('guests') ?: null,
             'category' => $request->string('category')->trim()->value() ?: null,
+            ...$guests->toFilterArray(),
         ];
 
         $query = Listing::query()
@@ -34,11 +37,8 @@ class ListingBrowseController extends Controller
             });
         }
 
-        if (! empty($filters['guests'])) {
-            $query->where(function ($q) use ($filters): void {
-                $q->whereNull('max_guests')
-                    ->orWhere('max_guests', '>=', $filters['guests']);
-            });
+        if ($guests->hasSearchCriteria()) {
+            $guests->applyListingScope($query);
         }
 
         /** @var LengthAwarePaginator<int, Listing> $listings */

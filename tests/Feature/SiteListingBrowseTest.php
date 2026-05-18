@@ -51,7 +51,9 @@ class SiteListingBrowseTest extends TestCase
 
         $response->assertOk()
             ->assertSee($published->title)
-            ->assertDontSee($draft->title);
+            ->assertDontSee($draft->title)
+            ->assertSee('mobile-search-trigger', false)
+            ->assertSee('mobile-search-sheet', false);
     }
 
     public function test_browse_page_filters_by_destination_and_guests(): void
@@ -63,6 +65,10 @@ class SiteListingBrowseTest extends TestCase
             'title' => '杭州西溪湿地畔住所',
             'city' => '杭州',
             'max_guests' => 4,
+            'max_adults' => 4,
+            'max_children' => 2,
+            'max_infants' => 1,
+            'max_pets' => 0,
             'status' => Listing::STATUS_PUBLISHED,
             'published_at' => now()->subDay(),
         ]);
@@ -71,13 +77,18 @@ class SiteListingBrowseTest extends TestCase
             'title' => '上海仅容两人的小公寓',
             'city' => '上海',
             'max_guests' => 2,
+            'max_adults' => 2,
+            'max_children' => 0,
+            'max_infants' => 0,
+            'max_pets' => 0,
             'status' => Listing::STATUS_PUBLISHED,
             'published_at' => now()->subDay(),
         ]);
 
         $response = $this->get(route('site.stays.index', [
             'destination' => '杭州',
-            'guests' => 4,
+            'adults' => 3,
+            'children' => 1,
         ]));
 
         $response->assertOk()
@@ -149,6 +160,42 @@ class SiteListingBrowseTest extends TestCase
         $this->assertSame($checkOut, $booking->check_out->toDateString());
         $this->assertNotNull($booking->guest_access_token_hash);
         $this->assertNotNull($booking->guest_access_token_expires_at);
+    }
+
+    public function test_booking_inquiry_stores_guest_breakdown(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $landlord = Landlord::factory()->for($tenant)->create();
+
+        $listing = Listing::factory()->forLandlord($landlord)->create([
+            'status' => Listing::STATUS_PUBLISHED,
+            'published_at' => now()->subDay(),
+            'min_nights' => 1,
+            'max_adults' => 4,
+            'max_children' => 2,
+            'max_infants' => 1,
+            'max_pets' => 1,
+            'max_guests' => 6,
+        ]);
+
+        $this->post(route('site.bookings.store', $listing), [
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(8)->toDateString(),
+            'adults' => 2,
+            'children' => 1,
+            'infants' => 1,
+            'pets' => 1,
+            'guest_name' => 'Family Guest',
+        ])->assertRedirect();
+
+        $booking = Booking::query()->where('listing_id', $listing->id)->latest('id')->first();
+
+        $this->assertNotNull($booking);
+        $this->assertSame(2, $booking->guest_adults);
+        $this->assertSame(1, $booking->guest_children);
+        $this->assertSame(1, $booking->guest_infants);
+        $this->assertSame(1, $booking->guest_pets);
+        $this->assertSame(3, $booking->guests);
     }
 
     public function test_booking_inquiry_with_guest_email_queues_confirmation_mail(): void

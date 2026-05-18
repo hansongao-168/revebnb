@@ -2,15 +2,15 @@
     <x-slot:title>住宿 · Revebnb</x-slot:title>
 
     {{-- Hero --}}
-    <section class="relative overflow-hidden">
-        <div aria-hidden="true"
-             class="pointer-events-none absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full"
-             style="background: radial-gradient(closest-side, rgba(255,56,92,0.18), transparent 70%);"></div>
-        <div aria-hidden="true"
-             class="pointer-events-none absolute -top-20 right-0 h-[26rem] w-[26rem] rounded-full"
-             style="background: radial-gradient(closest-side, rgba(255,200,120,0.22), transparent 70%);"></div>
+    <section class="relative">
+        <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+            <div class="absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full"
+                 style="background: radial-gradient(closest-side, rgba(255,56,92,0.18), transparent 70%);"></div>
+            <div class="absolute -top-20 right-0 h-[26rem] w-[26rem] rounded-full"
+                 style="background: radial-gradient(closest-side, rgba(255,200,120,0.22), transparent 70%);"></div>
+        </div>
 
-        <div class="site-shell pt-14 md:pt-20 pb-12 md:pb-16 relative">
+        <div class="site-shell relative z-10 pt-14 md:pt-20 pb-12 md:pb-16">
             <p class="text-[11px] uppercase tracking-[0.4em] text-coral-600 font-semibold">REVEBNB · CITY STAYS</p>
             <h1 class="display-hero mt-5 text-5xl md:text-7xl lg:text-[5.5rem] text-ink-900 max-w-4xl">
                 城市里的<em>另一段</em>停留<br>

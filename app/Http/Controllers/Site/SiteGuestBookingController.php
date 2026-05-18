@@ -10,6 +10,7 @@ use App\Models\Booking;
 use App\Models\Listing;
 use App\Services\BookingAvailabilityService;
 use App\Services\GuestBookingAccessTokenService;
+use App\Support\GuestComposition;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -46,6 +47,8 @@ class SiteGuestBookingController extends Controller
         $issued = $tokens->issue();
         $expires = now()->addDays((int) config('guest_booking.token_ttl_days'));
 
+        $guests = $request->guestComposition();
+
         $booking = Booking::query()->create([
             'listing_id' => $listing->id,
             'check_in' => $checkIn->toDateString(),
@@ -53,8 +56,8 @@ class SiteGuestBookingController extends Controller
             'status' => BookingStatus::Pending,
             'guest_name' => $validated['guest_name'],
             'guest_email' => $validated['guest_email'] ?? null,
-            'guests' => $validated['guests'] ?? null,
-            'notes' => $this->composeNotes($validated),
+            ...$guests->toBookingAttributes(),
+            'notes' => $this->composeNotes($validated, $guests),
             'guest_access_token_hash' => $issued['hash'],
             'guest_access_token_expires_at' => $expires,
         ]);
@@ -108,18 +111,16 @@ class SiteGuestBookingController extends Controller
     }
 
     /** @param array<string, mixed> $data */
-    private function composeNotes(array $data): ?string
+    private function composeNotes(array $data, GuestComposition $guests): ?string
     {
         $parts = [];
 
-        if (! empty($data['guests'])) {
-            $parts[] = '旅客人数：'.$data['guests'];
-        }
+        $parts[] = '旅客：'.$guests->label();
 
         if (! empty($data['notes'])) {
             $parts[] = (string) $data['notes'];
         }
 
-        return $parts === [] ? null : implode("\n", $parts);
+        return implode("\n", $parts);
     }
 }

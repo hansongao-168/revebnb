@@ -252,13 +252,23 @@
                             </p>
                         </div>
 
-                        <label class="block border border-ink-200 rounded-xl mt-3 px-3 py-2.5 hover:bg-cream-100 transition cursor-pointer">
-                            <span class="block text-[10px] uppercase tracking-[0.18em] text-ink-500 font-semibold">旅客</span>
-                            <input type="number" name="guests"
-                                   min="1" max="{{ $listing->max_guests ?? 10 }}"
-                                   value="{{ old('guests', 2) }}"
-                                   class="mt-1 w-full bg-transparent text-sm text-ink-900 focus:outline-none">
-                        </label>
+                        @php
+                            $bookingGuests = \App\Support\GuestComposition::fromArray([
+                                'adults' => old('adults', old('guest_adults', 2)),
+                                'children' => old('children', old('guest_children', 0)),
+                                'infants' => old('infants', old('guest_infants', 0)),
+                                'pets' => old('pets', old('guest_pets', 0)),
+                            ]);
+                        @endphp
+                        <div class="mt-3 rounded-xl border border-ink-200 px-3 py-2.5 hover:bg-cream-100 transition">
+                            <x-site.guest-picker
+                                :adults="$bookingGuests->adults"
+                                :children="$bookingGuests->children"
+                                :infants="$bookingGuests->infants"
+                                :pets="$bookingGuests->pets"
+                                :limits="$listing->guestCapacityLimits()"
+                            />
+                        </div>
 
                         <div class="mt-4 grid grid-cols-1 gap-3">
                             <label class="block">

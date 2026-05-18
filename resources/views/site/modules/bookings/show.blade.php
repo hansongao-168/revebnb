@@ -36,10 +36,10 @@
                         <dt class="text-ink-500">退房</dt>
                         <dd class="font-semibold text-ink-900">{{ $booking->check_out->toDateString() }}</dd>
                     </div>
-                    @if ($booking->guests)
+                    @if ($booking->guest_adults !== null || $booking->guests)
                         <div class="flex items-center justify-between gap-4 border-b border-ink-100 pb-4">
                             <dt class="text-ink-500">人数</dt>
-                            <dd class="font-semibold text-ink-900">{{ $booking->guests }} 位</dd>
+                            <dd class="font-semibold text-ink-900">{{ $booking->guestComposition()->label() }}</dd>
                         </div>
                     @endif
                     @if ($booking->notes)

@@ -13,6 +13,30 @@ class Listing extends Model
     /** @use HasFactory<ListingFactory> */
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::saving(function (Listing $listing): void {
+            if ($listing->max_adults !== null) {
+                $listing->max_guests = $listing->max_adults + (int) ($listing->max_children ?? 0);
+            }
+        });
+    }
+
+    /**
+     * @return array{adults: int, children: int, infants: int, pets: int}
+     */
+    public function guestCapacityLimits(): array
+    {
+        $fallback = $this->max_guests ?? 16;
+
+        return [
+            'adults' => $this->max_adults ?? $fallback,
+            'children' => $this->max_children ?? $fallback,
+            'infants' => $this->max_infants ?? 5,
+            'pets' => $this->max_pets ?? 0,
+        ];
+    }
+
     public const STATUS_DRAFT = 'draft';
 
     public const STATUS_PUBLISHED = 'published';
@@ -32,6 +56,10 @@ class Listing extends Model
         'status',
         'min_nights',
         'max_guests',
+        'max_adults',
+        'max_children',
+        'max_infants',
+        'max_pets',
         'guest_info_html',
         'published_at',
     ];
@@ -42,6 +70,10 @@ class Listing extends Model
             'nightly_price' => 'decimal:2',
             'min_nights' => 'integer',
             'max_guests' => 'integer',
+            'max_adults' => 'integer',
+            'max_children' => 'integer',
+            'max_infants' => 'integer',
+            'max_pets' => 'integer',
             'published_at' => 'datetime',
         ];
     }

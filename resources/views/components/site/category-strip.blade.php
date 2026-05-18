@@ -14,7 +14,10 @@
                         'destination' => $filters['destination'] ?? null,
                         'check_in' => $filters['check_in'] ?? null,
                         'check_out' => $filters['check_out'] ?? null,
-                        'guests' => $filters['guests'] ?? null,
+                        'adults' => ($filters['adults'] ?? 1) > 1 ? $filters['adults'] : null,
+                        'children' => ($filters['children'] ?? 0) > 0 ? $filters['children'] : null,
+                        'infants' => ($filters['infants'] ?? 0) > 0 ? $filters['infants'] : null,
+                        'pets' => ($filters['pets'] ?? 0) > 0 ? $filters['pets'] : null,
                         'category' => $categoryKey,
                     ], fn ($v) => $v !== null && $v !== '');
                 @endphp
